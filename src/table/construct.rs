@@ -1,5 +1,5 @@
-use super::{inner, Action, NaiveLR1Table};
-use crate::{Grammar, Symbol};
+use super::{Action, NaiveLR1Table};
+use crate::grammar::Grammar;
 
 #[derive(Debug)]
 pub struct ConstructionError {

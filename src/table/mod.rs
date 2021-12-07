@@ -1,5 +1,4 @@
 mod table;
-use self::table::Reduction;
 pub use self::table::{
     Action,
     LR1Table,

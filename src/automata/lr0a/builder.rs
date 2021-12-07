@@ -2,7 +2,7 @@
 
 use std::collections::BTreeSet;
 use super::{inner, LR0Item, LR0A, State};
-use crate::{Grammar, Symbol};
+use crate::grammar::{Grammar, Symbol};
 
 pub struct LR0ABuilder<'a> {
     grammar: &'a Grammar,

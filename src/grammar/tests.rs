@@ -1,6 +1,6 @@
 #![allow(non_upper_case_globals)]
 
-use super::{Symbol, Grammar, GrammarBuilder, First, Follow, nullability};
+use super::{Symbol, Grammar, GrammarBuilder};
 
 fn rr_expr_grammar() -> Grammar {
     const add: Symbol    = Symbol::Terminal(0);
@@ -54,7 +54,7 @@ const Factor: usize = 4;
 #[test]
 fn test_nullability() {
     let grammar = rr_expr_grammar();
-    let nullable = nullability(&grammar);
+    let nullable = grammar.nullability();
     assert!(!nullable[Expr]);
     assert!(nullable[Expr_]);
     assert!(!nullable[Term]);
@@ -73,7 +73,7 @@ fn test_first() {
     const num: usize    = 7;
 
     let grammar = rr_expr_grammar();
-    let first = First::new(&grammar, &nullability(&grammar));
+    let first = grammar.first_set();
     assert_eq!(&first[Expr], &[lparen, name, num]);
     assert_eq!(&first[Expr_], &[add, sub]);
     assert_eq!(&first[Term], &[lparen, name, num]);
@@ -92,8 +92,7 @@ fn test_follow() {
     const eof: Option<usize>    = None;
 
     let grammar = rr_expr_grammar();
-    let nullable = nullability(&grammar);
-    let follow = Follow::new(&grammar, &nullable, &First::new(&grammar, &nullable));
+    let follow = grammar.follow_set();
     assert_eq!(&follow[Expr], &[eof, rparen]);
     assert_eq!(&follow[Expr_], &[eof, rparen]);
     assert_eq!(&follow[Term], &[eof, add, sub, rparen]);

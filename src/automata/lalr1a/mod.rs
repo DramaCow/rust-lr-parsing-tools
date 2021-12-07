@@ -1,8 +1,8 @@
 #![allow(non_snake_case)]
 
 use std::collections::{HashSet, HashMap};
-use crate::Grammar;
 use super::{LR0A, lr0a::State};
+use crate::grammar::Grammar;
 
 pub struct LALR1A<'a> {
     lr0a: LR0A<'a>,

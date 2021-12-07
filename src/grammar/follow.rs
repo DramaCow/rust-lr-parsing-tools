@@ -17,7 +17,7 @@ pub struct Follow {
 
 impl Follow {
     #[must_use]
-    pub(crate) fn new(grammar: &Grammar, nullable: &[bool], first: &First) -> Self {
+    pub(super) fn new(grammar: &Grammar, nullable: &[bool], first: &First) -> Self {
         let var_follows = compute_var_follows(grammar, nullable, first);
         let var_ranges = once(0)
             .chain(

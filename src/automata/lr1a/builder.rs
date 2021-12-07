@@ -3,7 +3,7 @@
 use std::collections::BTreeSet;
 use std::iter::once;
 use super::{inner, LR1Item, LR1A, State};
-use crate::{Grammar, Symbol, nullability, First};
+use crate::grammar::{Grammar, Symbol, First};
 
 pub struct LR1ABuilder<'a> {
     grammar: &'a Grammar,
@@ -90,11 +90,10 @@ impl inner::BuildItemSets<LR1Item> for LR1ABuilder<'_> {
 impl<'a> LR1ABuilder<'a> {
     #[must_use]
     pub fn new(grammar: &'a Grammar) -> Self {
-        let nullable = nullability(grammar);
         LR1ABuilder {
             grammar,
-            nullable: nullability(grammar),
-            first: First::new(grammar, &nullable),
+            nullable: grammar.nullability(),
+            first: grammar.first_set(),
         }
     }
 

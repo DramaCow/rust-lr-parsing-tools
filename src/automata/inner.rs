@@ -1,7 +1,7 @@
 use std::collections::{BTreeSet, HashMap, VecDeque};
 use std::iter::once;
 use std::rc::Rc;
-use crate::Symbol;
+use crate::grammar::Symbol;
 
 pub trait BuildItemSets<T: Ord + std::hash::Hash + std::fmt::Debug> {
     fn start_item(&self) -> T;

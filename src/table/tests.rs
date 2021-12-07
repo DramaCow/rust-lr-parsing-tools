@@ -1,6 +1,6 @@
 use std::iter::once;
 use super::{Event, Parse, strategy, Conflict, LR1TableConstruction};
-use crate::{GrammarBuilder, Symbol::Terminal as Word, Symbol::Variable as Var};
+use crate::grammar::{GrammarBuilder, Symbol::Terminal as Word, Symbol::Variable as Var};
 
 #[test]
 fn parentheses_grammar() {

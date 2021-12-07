@@ -1,9 +1,7 @@
 use std::iter::{Once, once};
-use super::{super::inner};
-use crate::{LR1A, LR1Item};
-use crate::{Grammar, Symbol};
-use super::super::LR1TableConstruction;
-use super::super::{Action, NaiveLR1Table, Conflict, ConstructionError};
+use crate::grammar::{Grammar, Symbol};
+use crate::automata::{LR1A, LR1Item};
+use super::super::{inner, LR1TableConstruction, Action, NaiveLR1Table, Conflict, ConstructionError};
 
 pub struct LR1;
 

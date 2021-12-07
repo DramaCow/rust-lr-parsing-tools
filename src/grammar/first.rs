@@ -6,7 +6,7 @@ use crate::transitive_closure;
 
 /// For non-terminal A, first[A] is the set of terminals that can appear at
 /// the start of a sentence derived from A. This does not include epsilons;
-/// for this behaviour, see [nullability]().
+/// for this behaviour, see [nullability](Grammar::nullability).
 #[derive(Debug)]
 pub struct First {
     firsts: Vec<usize>,
@@ -15,7 +15,7 @@ pub struct First {
 
 impl First {
     #[must_use]
-    pub(crate) fn new(grammar: &Grammar, nullable: &[bool]) -> Self {
+    pub(super) fn new(grammar: &Grammar, nullable: &[bool]) -> Self {
         let var_firsts = compute_var_firsts(grammar, nullable);
         let var_ranges = once(0)
             .chain(

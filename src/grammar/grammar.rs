@@ -1,3 +1,5 @@
+use super::{First, Follow};
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Symbol {
     /// TODO: doc
@@ -63,6 +65,46 @@ impl Grammar {
     #[must_use]
     pub fn productions(&self) -> ProductionView {
         ProductionView { grammar: self }
+    }
+
+    #[must_use]
+    pub fn nullability(&self) -> Vec<bool> {
+        let mut nullable = vec![false; self.rules().len()];
+
+        let mut done = false;
+
+        while !done {
+            done = true;
+
+            for (A, rule) in self.rules().into_iter().enumerate() {
+                if !nullable[A] {
+                    nullable[A] = rule.alts().any(|alt| {
+                        alt.iter().all(|&symbol| {
+                            match symbol {
+                                Symbol::Terminal(_) => false,
+                                Symbol::Variable(B) => nullable[B],
+                            }
+                        })
+                    });
+        
+                    if nullable[A] {
+                        done = false;
+                    }
+                }
+            }
+        }
+
+        nullable
+    }
+
+    #[must_use]
+    pub fn first_set(&self) -> First {
+        First::new(self, &self.nullability())
+    }
+
+    #[must_use]
+    pub fn follow_set(&self) -> Follow {
+        Follow::new(self, &self.nullability(), &self.first_set())
     }
 }
 

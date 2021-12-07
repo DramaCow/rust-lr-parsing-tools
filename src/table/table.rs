@@ -2,7 +2,7 @@
 
 use super::inner::{Lookaheads};
 use super::{Conflict, ConstructionError};
-use crate::Symbol;
+use crate::grammar::Symbol;
 
 #[derive(Debug, Clone, Copy)]
 pub enum Action {

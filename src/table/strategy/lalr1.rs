@@ -1,10 +1,8 @@
 use std::iter::Copied;
 use std::collections::hash_set;
-use crate::{Grammar, Symbol};
-use crate::{LALR1A, LR0Item};
-use super::{super::inner};
-use super::super::LR1TableConstruction;
-use super::super::{Action, NaiveLR1Table, Conflict, ConstructionError};
+use crate::grammar::{Grammar, Symbol};
+use crate::automata::{LALR1A, LR0Item};
+use super::super::{inner, LR1TableConstruction, Action, NaiveLR1Table, Conflict, ConstructionError};
 
 pub struct LALR1;
 

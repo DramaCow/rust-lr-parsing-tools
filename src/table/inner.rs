@@ -1,4 +1,4 @@
-use crate::{Grammar, Symbol};
+use crate::grammar::{Grammar, Symbol};
 
 pub trait ItemSets {
     type Item;

@@ -3,7 +3,7 @@
 use std::collections::{HashSet, HashMap};
 use super::LR0A;
 use super::{LALR1A, StateReductionPair};
-use crate::{Grammar, Symbol, nullability};
+use crate::grammar::{Grammar, Symbol};
 use crate::transitive_closure;
 
 pub struct LALR1ABuilder<'a> {
@@ -41,7 +41,7 @@ impl<'a> LALR1ABuilder<'a> {
         Self {
             grammar,
             lr0a,
-            nullable: nullability(grammar),
+            nullable: grammar.nullability(),
             nonterminal_transitions,
             nonterminal_transition_map,
         }

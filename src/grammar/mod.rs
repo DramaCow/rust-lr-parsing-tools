@@ -10,9 +10,6 @@ pub use self::grammar::{
     Symbol,
 };
 
-mod nullability;
-pub use self::nullability::nullability;
-
 mod first;
 pub use self::first::First;
 

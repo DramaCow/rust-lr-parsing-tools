@@ -2,7 +2,7 @@
 
 use std::collections::HashMap;
 use super::{inner, LR0Item};
-use crate::{Grammar, Symbol};
+use crate::grammar::{Grammar, Symbol};
 
 pub struct LR0A<'a> {
     grammar: &'a Grammar,

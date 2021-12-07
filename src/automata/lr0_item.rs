@@ -1,4 +1,4 @@
-use crate::{Grammar, Symbol};
+use crate::grammar::{Grammar, Symbol};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct LR0Item {
