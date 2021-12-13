@@ -248,7 +248,7 @@ impl GrammarBuilder {
     /// # Panics
     #[must_use]
     pub fn rule(mut self, rule: &[&[Symbol]]) -> Self {
-        let lhs = self.grammar.lhs.len();
+        let lhs = self.grammar.rules.len() - 1;
         for &alt in rule {
             self.grammar.lhs.push(lhs);
             self.grammar.symbols.append(&mut alt.to_vec());
@@ -282,7 +282,7 @@ impl GrammarBuilder {
         }
 
         // finally, we augment the grammar by adding a start rule
-        self.grammar.lhs.push(self.grammar.lhs.len());
+        self.grammar.lhs.push(self.grammar.rules.len() - 1);
         self.grammar.symbols.push(Symbol::Variable(0));
         self.grammar.alts.push(self.grammar.symbols.len());
         self.grammar.rules.push(self.grammar.rules.last().unwrap() + 1);
