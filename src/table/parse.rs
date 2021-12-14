@@ -12,7 +12,7 @@ pub enum Event<T> {
 pub struct Parse<'a, P, I, T, F> {
     table:         &'a P,
     input:         I,
-    f:             F,
+    get_id:        F,
     step:          usize,
     next_word:     Option<T>,
     next_action:   Action,
@@ -32,11 +32,11 @@ where
     F: Fn(&T) -> usize,
 {
     #[must_use]
-    pub fn new(table: &'a P, input: I, f: F) -> Self {
+    pub fn new(table: &'a P, input: I, get_id: F) -> Self {
         Self {
             table,
             input,
-            f,
+            get_id,
             step:          0, // only really useful for debugging, not strictly necessary
             next_word:     None,
             next_action:   Action::Shift(P::START_STATE),
@@ -59,7 +59,7 @@ where
                 Some(Err(ParseError::InvalidAction {
                     step: self.step,
                     state: *self.state_history.last().unwrap(),
-                    word: self.next_word.as_ref().map(&self.f),
+                    word: self.next_word.as_ref().map(&self.get_id),
                 }))
             },
             Action::Accept => {
@@ -70,7 +70,7 @@ where
                     Ok(val) => val,
                     Err(err) => return Some(Err(ParseError::InputError(err))),
                 });
-                self.next_action = self.table.action(state, self.next_word.as_ref().map(&self.f));
+                self.next_action = self.table.action(state, self.next_word.as_ref().map(&self.get_id));
                 self.state_history.push(state);
 
                 if let Some(word) = curr_word {
@@ -94,7 +94,7 @@ where
                 let old_state = *self.state_history.last().unwrap();
 
                 if let Some(state) = self.table.goto(old_state, reduction.var) {
-                    self.next_action = self.table.action(state, self.next_word.as_ref().map(&self.f));
+                    self.next_action = self.table.action(state, self.next_word.as_ref().map(&self.get_id));
                     self.state_history.push(state);
                     Some(Ok(Event::Reduce {
                         var: reduction.var,
