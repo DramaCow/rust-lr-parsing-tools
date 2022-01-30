@@ -5,6 +5,9 @@ pub use self::{
     lr1_item::LR1Item,
 };
 
+mod lr_automaton;
+pub use self::lr_automaton::LRAutomaton;
+
 mod lr0a;
 mod lalr1a;
 mod lr1a;

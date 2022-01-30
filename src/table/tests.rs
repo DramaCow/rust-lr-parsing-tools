@@ -1,6 +1,7 @@
 use std::iter::once;
-use super::{Event, Parse, strategy, Conflict, LR1TableConstruction};
+use super::{Event, Parse, Conflict, NaiveLR1Table};
 use crate::grammar::{GrammarBuilder, Symbol::Terminal as Word, Symbol::Variable as Var};
+use crate::automata::LR1A;
 
 #[test]
 fn parentheses_grammar() {
@@ -9,7 +10,7 @@ fn parentheses_grammar() {
         .rule(&[&[Word(0), Var(0), Word(1)], &[Word(0), Word(1)]])
         .build().unwrap();
 
-    let parser = strategy::LR1::construct(&grammar, |conflict: Conflict| { Err(conflict) }).unwrap();
+    let parser = NaiveLR1Table::build(&LR1A::new(&grammar), |conflict: Conflict| { Err(conflict) }).unwrap();
 
     // ad hoc ground truth
     let is_valid = |input: &[usize]| -> bool {
@@ -51,7 +52,7 @@ fn parentheses_grammar_2() {
         .rule(&[&[Word(0), Var(0), Word(1)], &[Word(0), Word(1)]])
         .build().unwrap();
 
-    let parser = strategy::LR1::construct(&grammar, |conflict: Conflict| { Err(conflict) }).unwrap();
+    let parser = NaiveLR1Table::build(&LR1A::new(&grammar), |conflict: Conflict| { Err(conflict) }).unwrap();
 
     let input = vec![0, 0, 1, 1].into_iter().map(Ok::<_,()>);
 

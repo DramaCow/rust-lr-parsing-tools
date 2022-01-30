@@ -9,7 +9,6 @@ mod construct;
 pub use self::construct::{
     ConstructionError,
     Conflict,
-    LR1TableConstruction,
 };
 
 mod parse;
@@ -19,13 +18,9 @@ pub use self::parse::{
     ParseError,
 };
 
-pub mod strategy;
-
 // =================
 // === INTERNALS ===
 // =================
-
-mod inner;
 
 #[cfg(test)]
 mod tests;
