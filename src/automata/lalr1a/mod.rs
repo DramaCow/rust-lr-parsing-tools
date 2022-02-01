@@ -7,13 +7,7 @@ use crate::grammar::{Grammar, Symbol};
 
 pub struct LALR1A<'a> {
     lr0a: LR0A<'a>,
-    lookahead: HashMap<StateReductionPair, HashSet<Option<usize>>>,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct StateReductionPair {
-    pub state: usize,
-    pub production: usize,
+    lookahead: Vec<HashMap<usize, HashSet<Option<usize>>>>,
 }
 
 impl<'a> LALR1A<'a> {
@@ -34,8 +28,7 @@ impl<'a> LALR1A<'a> {
 
     #[must_use]
     pub fn lookaheads(&self, state: usize, production: usize) -> &HashSet<Option<usize>> {
-        let pair = StateReductionPair { state, production };
-        &self.lookahead[&pair]
+        &self.lookahead[state][&production]
     }
 }
 

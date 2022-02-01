@@ -2,7 +2,7 @@
 
 use std::collections::{HashSet, HashMap};
 use super::LR0A;
-use super::{LALR1A, StateReductionPair};
+use super::LALR1A;
 use crate::grammar::{Grammar, Symbol};
 use crate::transitive_closure;
 
@@ -116,14 +116,16 @@ impl LALR1ABuilder<'_> {
     }
 
     #[must_use]
-    pub fn lookahead(&self) -> HashMap<StateReductionPair, HashSet<Option<usize>>> {
+    pub fn lookahead(&self) -> Vec<HashMap<usize, HashSet<Option<usize>>>> {
         let follow = self.follow();
 
-        self.lookback().into_iter().map(|(key, value)| {
-            (key, value.into_iter().fold(HashSet::new(), |mut acc, x| {
-                acc.extend(&follow[x]);
-                acc
-            }))
+        self.lookback().into_iter().map(|lookbacks| {
+            lookbacks.into_iter().map(|(var, nnts)| {
+                (var, nnts.into_iter().fold(HashSet::new(), |mut acc, nnt| {
+                    acc.extend(&follow[nnt]);
+                    acc
+                }))    
+            }).collect()
         }).collect()
     }
 
@@ -181,9 +183,9 @@ impl LALR1ABuilder<'_> {
             successors
         }).collect()
     }
-
+    
     #[must_use]
-    pub fn lookback(&self) -> HashMap<StateReductionPair, HashSet<usize>> {
+    pub fn lookback(&self) -> Vec<HashMap<usize, HashSet<usize>>> {
         // let inconsistent_state_reduction_pairs: Vec<(usize, usize)> = self.lr0a.states().iter()
         //     .enumerate()
         //     .filter_map(|(q, state)| {
@@ -202,7 +204,7 @@ impl LALR1ABuilder<'_> {
         // println!("{:?}", inconsistent_state_reduction_pairs);
 
         let states = self.lr0a.states();
-        let mut map: HashMap<StateReductionPair, HashSet<usize>> = HashMap::new();
+        let mut lookbacks = vec![HashMap::<usize, HashSet<usize>>::new(); self.lr0a.states().len()];
 
         for (i, &transition) in self.nonterminal_transitions().iter().enumerate() {
             let NonterminalTransition { state: p, var: A } = transition;
@@ -210,11 +212,11 @@ impl LALR1ABuilder<'_> {
             
             for (alt_index, alt) in rule.alt_indices().zip(rule.alts()) {
                 let q = alt.iter().fold(p, |q, symbol| states[q].next[symbol]);
-                map.entry(StateReductionPair { state: q, production: alt_index }).or_default().insert(i);
+                lookbacks[q].entry(alt_index).or_default().insert(i);
             }
         }
 
-        map
+        lookbacks
     }
 }
 
