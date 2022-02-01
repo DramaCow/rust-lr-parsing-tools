@@ -2,7 +2,7 @@
 
 use super::{Conflict, ConstructionError};
 use crate::grammar::Symbol;
-use crate::automata::LRAutomaton;
+use crate::automata::{LR0Item, LRAutomaton};
 
 #[derive(Debug, Clone, Copy)]
 pub enum Action {
@@ -41,6 +41,7 @@ impl NaiveLR1Table {
     pub fn build<'a, T, F>(automaton: &'a T, mut conflict_resolution: F) -> Result<NaiveLR1Table, ConstructionError>
     where
         T: LRAutomaton<'a>,
+        T::Item: AsRef<LR0Item>,
         T::Lookaheads: IntoIterator<Item = Option<usize>>,
         F: FnMut(Conflict) -> Result<Action, Conflict>,
     {
@@ -63,8 +64,8 @@ impl NaiveLR1Table {
 
         for i in 0..num_states {
             for item in automaton.items(i) {
-                if !automaton.is_complete(item) {
-                    let symbol = automaton.symbol_at_dot(item).unwrap();
+                if !item.as_ref().is_complete(&grammar) {
+                    let symbol = item.as_ref().symbol_at_dot(&grammar).unwrap();
                     if let Symbol::Terminal(word) = symbol {
                         // CASE 1: item is incomplete and has a terminal symbol at dot.
 
@@ -79,7 +80,7 @@ impl NaiveLR1Table {
                             *action = Action::Shift(next_state);
                         }
                     }
-                } else if table.reductions[automaton.production(item)].var < var_count {
+                } else if table.reductions[item.as_ref().production].var < var_count {
                     // CASE 2: item is complete and does not have the start symbol on LHS.
 
                     for lookahead in automaton.lookaheads(i, item) {
@@ -88,15 +89,15 @@ impl NaiveLR1Table {
                         
                         match *action {
                             Action::Shift(state) => {
-                                *action = conflict_resolution(Conflict::ShiftReduce { word: column - 1, next_state: state, production: automaton.production(item) })
+                                *action = conflict_resolution(Conflict::ShiftReduce { word: column - 1, next_state: state, production: item.as_ref().production })
                                     .map_err(|conflict| ConstructionError { state: i, conflict })?;
                             }
                             Action::Reduce(production1) => {
-                                *action = conflict_resolution(Conflict::ReduceReduce { production1, production2: automaton.production(item) })
+                                *action = conflict_resolution(Conflict::ReduceReduce { production1, production2: item.as_ref().production })
                                     .map_err(|conflict| ConstructionError { state: i, conflict })?;
                             }
                             _ => {
-                                *action = Action::Reduce(automaton.production(item));
+                                *action = Action::Reduce(item.as_ref().production);
                             }
                         }
                     }

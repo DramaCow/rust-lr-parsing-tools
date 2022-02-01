@@ -52,22 +52,6 @@ impl<'a> LRAutomaton<'a> for LALR1A<'_> {
         self.states()[state].next.get(&symbol).copied()
     }
 
-    fn production(&self, item: &Self::Item) -> usize {
-        item.production
-    }
-
-    fn pos(&self, item: &Self::Item) -> usize {
-        item.pos
-    }
-
-    fn is_complete(&self, item: &Self::Item) -> bool {
-        item.is_complete(self.grammar())
-    }
-
-    fn symbol_at_dot(&self, item: &Self::Item) -> Option<Symbol> {
-        item.symbol_at_dot(self.grammar())
-    }
-
     fn lookaheads(&'a self, state: usize, item: &Self::Item) -> Self::Lookaheads {
         self.lookaheads(state, item.production).iter().copied()
     }
