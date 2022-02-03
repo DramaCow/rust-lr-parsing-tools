@@ -6,7 +6,7 @@ pub use self::{
 };
 
 mod lr_automaton;
-pub use self::lr_automaton::LRAutomaton;
+pub use self::lr_automaton::{LRAutomaton, DottedItem};
 
 mod lr0a;
 mod lalr1a;
@@ -22,3 +22,6 @@ pub use self::{
 // =================
 
 mod inner;
+
+#[cfg(test)]
+mod tests;

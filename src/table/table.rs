@@ -2,7 +2,7 @@
 
 use super::{Conflict, ConstructionError};
 use crate::grammar::Symbol;
-use crate::automata::{LR0Item, LRAutomaton};
+use crate::automata::{LR0Item, LRAutomaton, DottedItem};
 
 #[derive(Debug, Clone, Copy)]
 pub enum Action {
@@ -41,8 +41,7 @@ impl NaiveLR1Table {
     pub fn build<'a, T, F>(automaton: &'a T, mut conflict_resolution: F) -> Result<NaiveLR1Table, ConstructionError>
     where
         T: LRAutomaton<'a>,
-        T::Item: AsRef<LR0Item>,
-        T::Lookaheads: IntoIterator<Item = Option<usize>>,
+        <T::ItemSet as IntoIterator>::Item: DottedItem,
         F: FnMut(Conflict) -> Result<Action, Conflict>,
     {
         let grammar = automaton.grammar();
@@ -64,8 +63,8 @@ impl NaiveLR1Table {
 
         for i in 0..num_states {
             for item in automaton.items(i) {
-                if !item.as_ref().is_complete(&grammar) {
-                    let symbol = item.as_ref().symbol_at_dot(&grammar).unwrap();
+                if !item.is_complete() {
+                    let symbol = item.symbol_at_dot().unwrap();
                     if let Symbol::Terminal(word) = symbol {
                         // CASE 1: item is incomplete and has a terminal symbol at dot.
 
@@ -80,29 +79,29 @@ impl NaiveLR1Table {
                             *action = Action::Shift(next_state);
                         }
                     }
-                } else if table.reductions[item.as_ref().production].var < var_count {
+                } else if table.reductions[item.production()].var < var_count {
                     // CASE 2: item is complete and does not have the start symbol on LHS.
 
-                    for lookahead in automaton.lookaheads(i, item) {
+                    for lookahead in item.lookaheads() {
                         let column = lookahead.map_or(0, |a| a + 1);
                         let action = table.actions.get_mut(i * word_count + column).unwrap();
                         
                         match *action {
                             Action::Shift(state) => {
-                                *action = conflict_resolution(Conflict::ShiftReduce { word: column - 1, next_state: state, production: item.as_ref().production })
+                                *action = conflict_resolution(Conflict::ShiftReduce { word: column - 1, next_state: state, production: item.production() })
                                     .map_err(|conflict| ConstructionError { state: i, conflict })?;
                             }
                             Action::Reduce(production1) => {
-                                *action = conflict_resolution(Conflict::ReduceReduce { production1, production2: item.as_ref().production })
+                                *action = conflict_resolution(Conflict::ReduceReduce { production1, production2: item.production() })
                                     .map_err(|conflict| ConstructionError { state: i, conflict })?;
                             }
                             _ => {
-                                *action = Action::Reduce(item.as_ref().production);
+                                *action = Action::Reduce(item.production());
                             }
                         }
                     }
                 } else {
-                    // CASE 3: item is complete and has start symbol on LHS (lookahead will always be eof).
+                    // CASE 3: item is complete and has start symbol on LHS (lookahead will always be {eof}).
                     table.actions[i * word_count] = Action::Accept;
                 }
             }
