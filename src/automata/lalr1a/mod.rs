@@ -2,13 +2,12 @@
 
 use std::iter::Copied;
 use std::collections::{hash_set, HashSet, HashMap};
-use super::{LR0A, lr0a::State, LR0Item, LRAutomaton, DottedItem};
+use super::{LR0A, LR0Item, LRAutomaton, DottedItem};
 use crate::grammar::{Grammar, Symbol};
 
 pub struct LALR1A<'a> {
     lr0a: LR0A<'a>,
-    // pub lookahead: Vec<HashMap<usize, HashSet<Option<usize>>>>,
-    pub lookahead: HashMap<StateReductionPair, HashSet<Option<usize>>>,
+    lookahead: HashMap<StateReductionPair, HashSet<Option<usize>>>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -97,13 +96,8 @@ impl<'a> DottedItem for LALR1ItemProxy<'a> {
     fn symbol_at_dot(&self) -> Option<Symbol> {
         self.item.symbol_at_dot(self.lalr1a.grammar())
     }
-    
-    // fn symbols(&self) -> &[Symbol] {
-    //     self.lalr1a.grammar().productions().get(self.item.production).1
-    // }
 
     fn lookaheads(&self) -> Self::Lookaheads {
-        // self.lalr1a.lookahead[self.state][&self.item.production].iter().copied()
         let pair = StateReductionPair { state: self.state, production: self.item.production };
         self.lalr1a.lookahead[&pair].iter().copied()
     }

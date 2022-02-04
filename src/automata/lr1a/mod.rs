@@ -86,10 +86,6 @@ impl DottedItem for LR1ItemProxy<'_> {
     fn symbol_at_dot(&self) -> Option<Symbol> {
         self.item.lr0_item.symbol_at_dot(self.grammar)
     }
-    
-    // fn symbols(&self) -> &[Symbol] {
-    //     self.grammar.productions().get(self.item.lr0_item.production).1
-    // }
 
     fn lookaheads(&self) -> Self::Lookaheads {
         once(self.item.lookahead)

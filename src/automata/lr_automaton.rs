@@ -34,8 +34,6 @@ pub trait DottedItem {
     fn is_complete(&self) -> bool;
     
     fn symbol_at_dot(&self) -> Option<Symbol>;
-    
-    // fn symbols(&self) -> &[Symbol];
 
     fn lookaheads(&self) -> Self::Lookaheads;
 }

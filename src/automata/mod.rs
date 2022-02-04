@@ -22,6 +22,3 @@ pub use self::{
 // =================
 
 mod inner;
-
-#[cfg(test)]
-mod tests;

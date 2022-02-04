@@ -50,14 +50,6 @@ impl<'a> LALR1ABuilder<'a> {
     #[must_use]
     pub fn build(self) -> LALR1A<'a> {
         let lookahead = self.lookahead();
-
-        // sanity check
-        // for (i, state) in self.lr0a.states().iter().enumerate() {
-        //     for item in &state.items {
-        //         assert!(lookahead[i].contains_key(&item.production));
-        //     }
-        // }
-
         LALR1A {
             lr0a: self.lr0a,
             lookahead,
@@ -76,19 +68,15 @@ impl LALR1ABuilder<'_> {
         let states = self.lr0a.states();
         let mut direct_read: Vec<HashSet<Option<usize>>> = 
             vec![HashSet::new(); self.nonterminal_transitions.len()];
-
         for (i, &transition) in self.nonterminal_transitions.iter().enumerate() {
             let NonterminalTransition { state: p, var: A } = transition;
-
             // The only "transition" to the "accept state" is from the state
             // reached by shifting the start variable from the start state.
             // TODO: lift outside the loop
             if (p, A) == (0, 0) {
                 direct_read[i].insert(None);
             }
-
             let q = states[p].next[&Symbol::Variable(A)];
-
             for &symbol in states[q].next.keys() {
                 if let Symbol::Terminal(t) = symbol {
                     // (p, A) directly-reads t
@@ -96,7 +84,6 @@ impl LALR1ABuilder<'_> {
                 }
             }
         }
-
         direct_read
     }
 
@@ -104,11 +91,9 @@ impl LALR1ABuilder<'_> {
     pub fn read(&self) -> Vec<HashSet<Option<usize>>> {
         let mut read = self.direct_read();
         let reads = self.reads();
-
         if transitive_closure(&mut read, |i| reads[i].iter().copied(), extend) {
             // cycle detected, TODO: handle errors
         }
-
         read
     }
 
@@ -116,34 +101,15 @@ impl LALR1ABuilder<'_> {
     pub fn follow(&self) -> Vec<HashSet<Option<usize>>> {
         let mut follow = self.read();
         let includes = self.includes();
-
         if transitive_closure(&mut follow, |i| includes[i].iter().copied(), extend) {
             // cycle detected, TODO: handle errors
         }
-
         follow
     }
-
-    // #[must_use]
-    // pub fn lookahead(&self) -> Vec<HashMap<usize, HashSet<Option<usize>>>> {
-    //     let follow = self.follow();
-
-    //     self.lookback().into_iter().map(|lookbacks| {
-    //         lookbacks.into_iter().map(|(var, nnts)| {
-    //             (var, nnts.into_iter().fold(HashSet::new(), |mut acc, nnt| {
-    //                 acc.extend(&follow[nnt]);
-    //                 acc
-    //             }))    
-    //         }).collect()
-    //     }).collect()
-    // }
 
     #[must_use]
     pub fn lookahead(&self) -> HashMap<StateReductionPair, HashSet<Option<usize>>> {
         let follow = self.follow();
-
-        println!("follow {:?}", follow);
-
         self.lookback().into_iter().map(|(key, value)| {
             (key, value.into_iter().fold(HashSet::new(), |mut acc, x| {
                 acc.extend(&follow[x]);
@@ -155,13 +121,10 @@ impl LALR1ABuilder<'_> {
     #[must_use]
     pub fn reads(&self) -> Vec<HashSet<usize>> {
         // NOTE: this doesn't need to be stored: can be computed on the fly.
-
         let states = self.lr0a.states();
-
         self.nonterminal_transitions.iter().map(|&transition| {
             let NonterminalTransition { state: p, var: A } = transition;
             let q = states[p].next[&Symbol::Variable(A)];
-
             states[q].next.keys().filter_map(|&symbol| {
                 if let Symbol::Variable(B) = symbol {
                     if self.nullable[B] {
@@ -176,62 +139,25 @@ impl LALR1ABuilder<'_> {
         }).collect()
     }
 
-    // #[must_use]
-    // pub fn includes(&self) -> Vec<HashSet<usize>> {
-    //     let states = self.lr0a.states();
-
-    //     self.nonterminal_transitions.iter().map(|&transition| {
-    //         let NonterminalTransition { state: p, var: B } = transition;
-    //         let mut successors = HashSet::new();
-
-    //         for alt in self.grammar.rules().get(B).alts() {
-    //             let mut q = p;
-
-    //             for (i, &symbol) in alt.iter().enumerate() {
-    //                 if let Symbol::Variable(A) = symbol {
-    //                     let nullable_gamma = alt[i+1..].iter().all(|&symbol| match symbol {
-    //                         Symbol::Terminal(_) => false,
-    //                         Symbol::Variable(C) => self.nullable[C],
-    //                     });
-
-    //                     if nullable_gamma {
-    //                         successors.insert(self.nonterminal_transition_map[&NonterminalTransition { state: q, var: A }]);
-    //                     }
-    //                 }
-
-    //                 q = states[q].next[&symbol];
-    //             }
-    //         }
-
-    //         successors
-    //     }).collect()
-    // }
-
     #[must_use]
     pub fn includes(&self) -> Vec<HashSet<usize>> {
         let states = self.lr0a.states();
-
         let mut successors = vec![HashSet::new(); self.nonterminal_transitions.len()];
-
         for transition in self.nonterminal_transitions() {
             let NonterminalTransition { state: p, var: B } = *transition;
-
             for alt in self.grammar.rules().get(B).alts() {
                 let mut q = p;
-
                 for (i, &symbol) in alt.iter().enumerate() {
                     if let Symbol::Variable(A) = symbol {
                         let nullable_gamma = alt[i+1..].iter().all(|&symbol| match symbol {
                             Symbol::Terminal(_) => false,
                             Symbol::Variable(C) => self.nullable[C],
                         });
-
                         if nullable_gamma {
                             let i = self.nonterminal_transition_map[&NonterminalTransition { state: q, var: A }];
                             successors[i].insert(self.nonterminal_transition_map[transition]);
                         }
                     }
-
                     q = states[q].next[&symbol];
                 }
             }
@@ -239,41 +165,6 @@ impl LALR1ABuilder<'_> {
 
         successors
     }
-    
-    // #[must_use]
-    // pub fn lookback(&self) -> Vec<HashMap<usize, HashSet<usize>>> {
-    //     // let inconsistent_state_reduction_pairs: Vec<(usize, usize)> = self.lr0a.states().iter()
-    //     //     .enumerate()
-    //     //     .filter_map(|(q, state)| {
-    //     //         if state.items.len() > 1 {
-    //     //             Some(state.items.iter().filter_map(move |item| {
-    //     //                 if item.is_complete(self.grammar) {
-    //     //                     Some((q, item.production))
-    //     //                 } else {
-    //     //                     None
-    //     //                 }
-    //     //             }))
-    //     //         } else {
-    //     //             None
-    //     //         }
-    //     //     }).flatten().collect();
-    //     // println!("{:?}", inconsistent_state_reduction_pairs);
-
-    //     let states = self.lr0a.states();
-    //     let mut lookbacks = vec![HashMap::<usize, HashSet<usize>>::new(); self.lr0a.states().len()];
-
-    //     for (i, &transition) in self.nonterminal_transitions().iter().enumerate() {
-    //         let NonterminalTransition { state: p, var: A } = transition;
-    //         let rule = self.grammar.rules().get(A);
-            
-    //         for (alt_index, alt) in rule.alt_indices().zip(rule.alts()) {
-    //             let q = alt.iter().fold(p, |q, symbol| states[q].next[symbol]);
-    //             lookbacks[q].entry(alt_index).or_default().insert(i);
-    //         }
-    //     }
-
-    //     lookbacks
-    // }
 
     #[must_use]
     pub fn lookback(&self) -> HashMap<StateReductionPair, HashSet<usize>> {
@@ -293,20 +184,16 @@ impl LALR1ABuilder<'_> {
         //         }
         //     }).flatten().collect();
         // println!("{:?}", inconsistent_state_reduction_pairs);
-
         let states = self.lr0a.states();
         let mut map: HashMap<StateReductionPair, HashSet<usize>> = HashMap::new();
-
         for (i, &transition) in self.nonterminal_transitions().iter().enumerate() {
             let NonterminalTransition { state: p, var: A } = transition;
             let rule = self.grammar.rules().get(A);
-            
             for (alt_index, alt) in rule.alt_indices().zip(rule.alts()) {
                 let q = alt.iter().fold(p, |q, symbol| states[q].next[symbol]);
                 map.entry(StateReductionPair { state: q, production: alt_index }).or_default().insert(i);
             }
         }
-
         map
     }
 }
