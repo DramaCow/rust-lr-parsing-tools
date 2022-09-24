@@ -73,7 +73,7 @@ fn test_first() {
     const num: usize    = 7;
 
     let grammar = rr_expr_grammar();
-    let first = grammar.first_set();
+    let (first, _) = grammar.first_set();
     assert_eq!(&first[Expr], &[lparen, name, num]);
     assert_eq!(&first[Expr_], &[add, sub]);
     assert_eq!(&first[Term], &[lparen, name, num]);
@@ -92,7 +92,7 @@ fn test_follow() {
     const eof: Option<usize>    = None;
 
     let grammar = rr_expr_grammar();
-    let follow = grammar.follow_set();
+    let (follow, _, _) = grammar.follow_set();
     assert_eq!(&follow[Expr], &[eof, rparen]);
     assert_eq!(&follow[Expr_], &[eof, rparen]);
     assert_eq!(&follow[Term], &[eof, add, sub, rparen]);

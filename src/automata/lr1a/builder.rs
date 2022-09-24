@@ -42,14 +42,14 @@ impl inner::BuildItemSets<LR1Item> for LR1ABuilder<'_> {
                 if let Some(Symbol::Variable(var)) = item.lr0_item.symbol_at_dot(self.grammar) {
                     match item.lr0_item.symbol_after_dot(self.grammar) {
                         None => {
-                            for alt in self.grammar.rules().get(var).alt_indices() {
+                            for alt in self.grammar.rules().get(var).production_ids() {
                                 if new_items.insert(LR1Item::new(alt, 0, item.lookahead)) {
                                     done = false;
                                 }
                             }
                         },
                         Some(Symbol::Terminal(a)) => {
-                            for alt in self.grammar.rules().get(var).alt_indices() {
+                            for alt in self.grammar.rules().get(var).production_ids() {
                                 if new_items.insert(LR1Item::new(alt, 0, Some(a))) {
                                     done = false;
                                 }
@@ -60,7 +60,7 @@ impl inner::BuildItemSets<LR1Item> for LR1ABuilder<'_> {
 
                             if self.nullable[A] {
                                 for lookahead in first_A.iter().copied().map(Some).chain(once(item.lookahead)) {
-                                    for alt in self.grammar.rules().get(var).alt_indices() {
+                                    for alt in self.grammar.rules().get(var).production_ids() {
                                         if new_items.insert(LR1Item::new(alt, 0, lookahead)) {
                                             done = false;
                                         }
@@ -68,7 +68,7 @@ impl inner::BuildItemSets<LR1Item> for LR1ABuilder<'_> {
                                 }
                             } else {
                                 for &lookahead in first_A {
-                                    for alt in self.grammar.rules().get(var).alt_indices() {
+                                    for alt in self.grammar.rules().get(var).production_ids() {
                                         if new_items.insert(LR1Item::new(alt, 0, Some(lookahead))) {
                                             done = false;
                                         }
@@ -90,11 +90,8 @@ impl inner::BuildItemSets<LR1Item> for LR1ABuilder<'_> {
 impl<'a> LR1ABuilder<'a> {
     #[must_use]
     pub fn new(grammar: &'a Grammar) -> Self {
-        LR1ABuilder {
-            grammar,
-            nullable: grammar.nullability(),
-            first: grammar.first_set(),
-        }
+        let (first, nullable) = grammar.first_set();
+        LR1ABuilder { grammar, nullable, first }
     }
 
     #[must_use]

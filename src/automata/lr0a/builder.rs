@@ -32,7 +32,7 @@ impl inner::BuildItemSets<LR0Item> for LR0ABuilder<'_> {
 
             for item in &items {
                 if let Some(Symbol::Variable(A)) = item.symbol_at_dot(self.grammar) {
-                    for alt in self.grammar.rules().get(A).alt_indices() {
+                    for alt in self.grammar.rules().get(A).production_ids() {
                         if new_items.insert(LR0Item::new(alt, 0)) {
                             done = false;
                         }

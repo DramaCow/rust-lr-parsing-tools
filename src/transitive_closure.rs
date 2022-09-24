@@ -156,17 +156,17 @@ mod tests {
     fn tarjan_test_1() {
         let successors = |x: usize| {
             match x {
-                0 => (&[1]).iter().copied(),
-                1 => (&[2]).iter().copied(),
-                2 => (&[0, 3, 5]).iter().copied(),
-                4 => (&[3]).iter().copied(),
-                _ => (&[]).iter().copied(),
+                0 => [1].iter().copied(),
+                1 => [2].iter().copied(),
+                2 => [0, 3, 5].iter().copied(),
+                4 => [3].iter().copied(),
+                _ => [].iter().copied(),
             }
         };
         let mut reachable_nodes = unit_sets(6);
         let has_cycle = transitive_closure(&mut reachable_nodes, successors, extend);
         let counts: Vec<usize> = reachable_nodes.iter().map(HashSet::len).collect();
-        assert_eq!(counts, &[5, 5, 5, 1, 2, 1]);
+        assert_eq!(counts, [5, 5, 5, 1, 2, 1]);
         assert!(has_cycle);
     }
 
@@ -174,21 +174,21 @@ mod tests {
     fn tarjan_test_2() {
         let successors = |x: usize| {
             match x {
-                0 => (&[1, 4]).iter().copied(),
-                1 => (&[5]).iter().copied(),
-                2 => (&[1, 3, 6]).iter().copied(),
-                3 => (&[6]).iter().copied(),
-                4 => (&[0, 5]).iter().copied(),
-                5 => (&[2, 6]).iter().copied(),
-                6 => (&[7]).iter().copied(),
-                7 => (&[3]).iter().copied(),
-                _ => (&[]).iter().copied(),
+                0 => [1, 4].iter().copied(),
+                1 => [5].iter().copied(),
+                2 => [1, 3, 6].iter().copied(),
+                3 => [6].iter().copied(),
+                4 => [0, 5].iter().copied(),
+                5 => [2, 6].iter().copied(),
+                6 => [7].iter().copied(),
+                7 => [3].iter().copied(),
+                _ => [].iter().copied(),
             }
         };
         let mut reachable_nodes = unit_sets(8);
         let has_cycle = transitive_closure(&mut reachable_nodes, successors, extend);
         let counts: Vec<usize> = reachable_nodes.iter().map(HashSet::len).collect();
-        assert_eq!(counts, &[8, 6, 6, 3, 8, 6, 3, 3]);
+        assert_eq!(counts, [8, 6, 6, 3, 8, 6, 3, 3]);
         assert!(has_cycle);
     }
 
@@ -196,14 +196,14 @@ mod tests {
     fn tarjan_test_3() {
         let successors = |x: usize| {
             match x {
-                0 | 2 => (&[1]).iter().copied(),
-                _ => (&[]).iter().copied(),
+                0 | 2 => [1].iter().copied(),
+                _ => [].iter().copied(),
             }
         };
         let mut reachable_nodes = unit_sets(3);
         let has_cycle = transitive_closure(&mut reachable_nodes, successors, extend);
         let counts: Vec<usize> = reachable_nodes.iter().map(HashSet::len).collect();
-        assert_eq!(counts, &[2, 1, 2]);
+        assert_eq!(counts, [2, 1, 2]);
         assert!(!has_cycle);
     }
 
@@ -211,15 +211,15 @@ mod tests {
     fn tarjan_test_4() {
         let successors = |x: usize| {
             match x {
-                0 => (&[1, 2]).iter().copied(),
-                2 => (&[1]).iter().copied(),
-                _ => (&[]).iter().copied(),
+                0 => [1, 2].iter().copied(),
+                2 => [1].iter().copied(),
+                _ => [].iter().copied(),
             }
         };
         let mut reachable_nodes = unit_sets(3);
         let has_cycle = transitive_closure(&mut reachable_nodes, successors, extend);
         let counts: Vec<usize> = reachable_nodes.iter().map(HashSet::len).collect();
-        assert_eq!(counts, &[3, 1, 2]);
+        assert_eq!(counts, [3, 1, 2]);
         assert!(!has_cycle);
     }
 
@@ -227,15 +227,15 @@ mod tests {
     fn tarjan_test_5() {
         let successors = |x: usize| {
             match x {
-                0 => (&[2, 3]).iter().copied(),
-                2 | 3 => (&[1]).iter().copied(),
-                _ => (&[]).iter().copied(),
+                0 => [2, 3].iter().copied(),
+                2 | 3 => [1].iter().copied(),
+                _ => [].iter().copied(),
             }
         };
         let mut reachable_nodes = unit_sets(4);
         let has_cycle = transitive_closure(&mut reachable_nodes, successors, extend);
         let counts: Vec<usize> = reachable_nodes.iter().map(HashSet::len).collect();
-        assert_eq!(counts, &[4, 1, 2, 2]);
+        assert_eq!(counts, [4, 1, 2, 2]);
         assert!(!has_cycle);
     }
 
@@ -251,11 +251,11 @@ mod tests {
         // Successors are given by an adjacency list expressed as a function.
         let successors = |x: usize| {
             match x {
-                0 => (&[1]).iter().copied(),
-                1 => (&[2]).iter().copied(),
-                2 => (&[0, 3, 5]).iter().copied(),
-                4 => (&[3]).iter().copied(),
-                _ => (&[]).iter().copied(),
+                0 => [1].iter().copied(),
+                1 => [2].iter().copied(),
+                2 => [0, 3, 5].iter().copied(),
+                4 => [3].iter().copied(),
+                _ => [].iter().copied(),
             }
         };
         
@@ -267,7 +267,7 @@ mod tests {
         let has_cycle = transitive_closure(&mut reachable_nodes, successors, extend);
         let counts: Vec<usize> = reachable_nodes.iter().map(HashSet::len).collect();
         
-        assert_eq!(counts, &[5, 5, 5, 1, 2, 1]);
+        assert_eq!(counts, [5, 5, 5, 1, 2, 1]);
         assert!(has_cycle);
     }
 }

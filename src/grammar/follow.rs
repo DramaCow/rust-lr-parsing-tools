@@ -53,29 +53,23 @@ fn compute_var_follows(grammar: &Grammar, nullable: &[bool], first: &First) -> V
     let mut done = false;
     while !done {
         done = true;
-
-        for (A, rule) in grammar.rules().into_iter().enumerate() {
-            for alt in rule.alts() {
-                let mut trailer = follow[A].clone();
-
-                for &symbol in alt.iter().rev() {
-                    match symbol {
-                        Symbol::Terminal(b) => {
-                            trailer = once(Some(b)).collect();
+        for (A, beta) in grammar.productions() {
+            let mut trailer = follow[A].clone();
+            for &symbol in beta.iter().rev() {
+                match symbol {
+                    Symbol::Terminal(b) => {
+                        trailer = once(Some(b)).collect();
+                    }
+                    Symbol::Variable(B) => {
+                        if !trailer.is_subset(&follow[B]) {
+                            follow[B].extend(&trailer);
+                            done = false;
                         }
-                        Symbol::Variable(B) => {
-                            if !trailer.is_subset(&follow[B]) {
-                                follow[B].extend(&trailer);
-                                done = false;
-                            }
-
-                            let first_B = &first[B];
-
-                            if nullable[B] {
-                                trailer.extend(first_B.iter().copied().map(Some));
-                            } else {
-                                trailer = first_B.iter().copied().map(Some).collect();
-                            }
+                        let first_B = &first[B];
+                        if nullable[B] {
+                            trailer.extend(first_B.iter().copied().map(Some));
+                        } else {
+                            trailer = first_B.iter().copied().map(Some).collect();
                         }
                     }
                 }

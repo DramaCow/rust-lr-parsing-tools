@@ -67,7 +67,7 @@ impl LALR1ABuilder<'_> {
     pub fn direct_read(&self) -> Vec<HashSet<Option<usize>>> {
         let states = self.lr0a.states();
         let mut direct_read: Vec<HashSet<Option<usize>>> = 
-            vec![HashSet::new(); self.nonterminal_transitions.len()];
+            vec![HashSet::new(); self.nonterminal_transitions.len()];        
         for (i, &transition) in self.nonterminal_transitions.iter().enumerate() {
             let NonterminalTransition { state: p, var: A } = transition;
             // The only "transition" to the "accept state" is from the state
@@ -189,7 +189,7 @@ impl LALR1ABuilder<'_> {
         for (i, &transition) in self.nonterminal_transitions().iter().enumerate() {
             let NonterminalTransition { state: p, var: A } = transition;
             let rule = self.grammar.rules().get(A);
-            for (alt_index, alt) in rule.alt_indices().zip(rule.alts()) {
+            for (alt_index, alt) in rule.production_ids().zip(rule.alts()) {
                 let q = alt.iter().fold(p, |q, symbol| states[q].next[symbol]);
                 map.entry(StateReductionPair { state: q, production: alt_index }).or_default().insert(i);
             }

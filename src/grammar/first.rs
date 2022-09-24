@@ -60,23 +60,21 @@ fn compute_var_firsts(grammar: &Grammar, nullable: &[bool]) -> Vec<BTreeSet<usiz
     let mut first = vec![BTreeSet::new(); var_count];
     let mut dependency_matrix = vec![false; var_count * var_count];
     
-    // Initialise first to trivial values and fill dependency_matrix
-    for (A, rule) in grammar.rules().into_iter().enumerate() {
-        for alt in rule.alts() {            
-            for &symbol in alt {
-                match symbol {
-                    Symbol::Terminal(a) => {
-                        first[A].insert(a);
+    // Initialise first to trivial values and fill dependency_matrix          
+    for (A, beta) in grammar.productions() {
+        for &symbol in beta {
+            match symbol {
+                Symbol::Terminal(a) => {
+                    first[A].insert(a);
+                    break;
+                }
+                Symbol::Variable(B) => {
+                    dependency_matrix[A * var_count + B] = true;
+                    if !nullable[B] {
                         break;
                     }
-                    Symbol::Variable(B) => {
-                        dependency_matrix[A * var_count + B] = true;
-                        if !nullable[B] {
-                            break;
-                        }
-                    }
-                };
-            }
+                }
+            };
         }
     }
 

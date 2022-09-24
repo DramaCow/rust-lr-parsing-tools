@@ -53,10 +53,9 @@ impl NaiveLR1Table {
         let mut table = NaiveLR1Table {
             actions: vec![Action::Invalid; word_count * num_states],
             gotos: vec![None; var_count * num_states],
-            reductions: //grammar.productions().into_iter().map(|(lhs, rhs)| Reduction { var: lhs, count: rhs.len() }).collect(),
-                grammar.rules().into_iter().enumerate().flat_map(|(i, rule)| {
-                    rule.alts().map(move |alt| Reduction { var: i, count: alt.len() })
-                }).collect(),
+            reductions: grammar.productions().into_iter()
+                .map(|(A, beta)| Reduction { var: A, count: beta.len() })
+                .collect(),
             word_count,
             var_count,
         };

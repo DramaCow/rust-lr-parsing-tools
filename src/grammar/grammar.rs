@@ -98,13 +98,15 @@ impl Grammar {
     }
 
     #[must_use]
-    pub fn first_set(&self) -> First {
-        First::new(self, &self.nullability())
+    pub fn first_set(&self) -> (First, Vec<bool>) {
+        let nullable = self.nullability();
+        (First::new(self, &nullable), nullable)
     }
 
     #[must_use]
-    pub fn follow_set(&self) -> Follow {
-        Follow::new(self, &self.nullability(), &self.first_set())
+    pub fn follow_set(&self) -> (Follow, First, Vec<bool>) {
+        let (first, nullable) = self.first_set();
+        (Follow::new(self, &nullable, &first), first, nullable)
     }
 }
 
@@ -201,7 +203,7 @@ impl<'a> Rule<'a> {
     }
 
     #[must_use]
-    pub fn alt_indices(&self) -> std::ops::Range<usize> {
+    pub fn production_ids(&self) -> std::ops::Range<usize> {
         self.alt_first..self.alt_last
     }
 }
