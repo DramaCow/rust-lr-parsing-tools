@@ -1,7 +1,6 @@
 use std::collections::BTreeSet;
 use std::iter::once;
-use std::ops::Index;
-use super::{Grammar, Symbol};
+use super::{Grammar, Symbol, Nullable};
 use crate::transitive_closure;
 
 /// For non-terminal A, first[A] is the set of terminals that can appear at
@@ -15,7 +14,7 @@ pub struct First {
 
 impl First {
     #[must_use]
-    pub(super) fn new(grammar: &Grammar, nullable: &[bool]) -> Self {
+    pub(super) fn new(grammar: &Grammar, nullable: &Nullable) -> Self {
         let var_firsts = compute_var_firsts(grammar, nullable);
         let var_ranges = once(0)
             .chain(
@@ -29,12 +28,8 @@ impl First {
             var_ranges,
         }
     }
-}
 
-impl Index<usize> for First {
-    type Output = [usize];
-
-    fn index(&self, var: usize) -> &Self::Output {
+    pub fn get(&self, var: usize) -> &[usize] {
         &self.firsts[self.var_ranges[var]..self.var_ranges[var+1]]
     }
 }
@@ -55,7 +50,7 @@ impl Index<usize> for First {
 /// ```
 /// 
 /// Hence, we can compute `first` by applying the transitive closure algorithm.
-fn compute_var_firsts(grammar: &Grammar, nullable: &[bool]) -> Vec<BTreeSet<usize>> {
+fn compute_var_firsts(grammar: &Grammar, nullable: &Nullable) -> Vec<BTreeSet<usize>> {
     let var_count = grammar.rules().len();
     let mut first = vec![BTreeSet::new(); var_count];
     let mut dependency_matrix = vec![false; var_count * var_count];
@@ -70,7 +65,7 @@ fn compute_var_firsts(grammar: &Grammar, nullable: &[bool]) -> Vec<BTreeSet<usiz
                 }
                 Symbol::Variable(B) => {
                     dependency_matrix[A * var_count + B] = true;
-                    if !nullable[B] {
+                    if !nullable.get(B) {
                         break;
                     }
                 }

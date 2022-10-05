@@ -3,13 +3,13 @@
 use std::collections::{HashSet, HashMap};
 use super::LR0A;
 use super::{LALR1A, StateReductionPair};
-use crate::grammar::{Grammar, Symbol};
+use crate::grammar::{Grammar, Symbol, Nullable};
 use crate::transitive_closure;
 
 pub struct LALR1ABuilder<'a> {
     grammar: &'a Grammar,
     lr0a: LR0A<'a>,
-    nullable: Vec<bool>,
+    nullable: Nullable,
     nonterminal_transitions: Vec<NonterminalTransition>,
     nonterminal_transition_map: HashMap<NonterminalTransition, usize>,
 }
@@ -127,7 +127,7 @@ impl LALR1ABuilder<'_> {
             let q = states[p].next[&Symbol::Variable(A)];
             states[q].next.keys().filter_map(|&symbol| {
                 if let Symbol::Variable(B) = symbol {
-                    if self.nullable[B] {
+                    if self.nullable.get(B) {
                         // (p, A) reads (q, B)
                         let transition = NonterminalTransition { state: q, var: B };
                         let j = self.nonterminal_transition_map[&transition];
@@ -151,7 +151,7 @@ impl LALR1ABuilder<'_> {
                     if let Symbol::Variable(A) = symbol {
                         let nullable_gamma = alt[i+1..].iter().all(|&symbol| match symbol {
                             Symbol::Terminal(_) => false,
-                            Symbol::Variable(C) => self.nullable[C],
+                            Symbol::Variable(C) => self.nullable.get(C),
                         });
                         if nullable_gamma {
                             let i = self.nonterminal_transition_map[&NonterminalTransition { state: q, var: A }];

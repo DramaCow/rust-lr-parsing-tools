@@ -55,11 +55,11 @@ const Factor: usize = 4;
 fn test_nullability() {
     let grammar = rr_expr_grammar();
     let nullable = grammar.nullability();
-    assert!(!nullable[Expr]);
-    assert!(nullable[Expr_]);
-    assert!(!nullable[Term]);
-    assert!(nullable[Term_]);
-    assert!(!nullable[Factor]);
+    assert!(!nullable.get(Expr));
+    assert!(nullable.get(Expr_));
+    assert!(!nullable.get(Term));
+    assert!(nullable.get(Term_));
+    assert!(!nullable.get(Factor));
 }
 
 #[test]
@@ -74,11 +74,11 @@ fn test_first() {
 
     let grammar = rr_expr_grammar();
     let (first, _) = grammar.first_set();
-    assert_eq!(&first[Expr], &[lparen, name, num]);
-    assert_eq!(&first[Expr_], &[add, sub]);
-    assert_eq!(&first[Term], &[lparen, name, num]);
-    assert_eq!(&first[Term_], &[mul, div]);
-    assert_eq!(&first[Factor], &[lparen, name, num]);
+    assert_eq!(&first.get(Expr), &[lparen, name, num]);
+    assert_eq!(&first.get(Expr_), &[add, sub]);
+    assert_eq!(&first.get(Term), &[lparen, name, num]);
+    assert_eq!(&first.get(Term_), &[mul, div]);
+    assert_eq!(&first.get(Factor), &[lparen, name, num]);
     println!("first = {:?}", first);
 }
 
@@ -93,9 +93,9 @@ fn test_follow() {
 
     let grammar = rr_expr_grammar();
     let (follow, _, _) = grammar.follow_set();
-    assert_eq!(&follow[Expr], &[eof, rparen]);
-    assert_eq!(&follow[Expr_], &[eof, rparen]);
-    assert_eq!(&follow[Term], &[eof, add, sub, rparen]);
-    assert_eq!(&follow[Term_], &[eof, add, sub, rparen]);
-    assert_eq!(&follow[Factor], &[eof, add, sub, mul, div, rparen]);
+    assert_eq!(&follow.get(Expr), &[eof, rparen]);
+    assert_eq!(&follow.get(Expr_), &[eof, rparen]);
+    assert_eq!(&follow.get(Term), &[eof, add, sub, rparen]);
+    assert_eq!(&follow.get(Term_), &[eof, add, sub, rparen]);
+    assert_eq!(&follow.get(Factor), &[eof, add, sub, mul, div, rparen]);
 }

@@ -16,6 +16,9 @@ pub use self::first::First;
 mod follow;
 pub use self::follow::Follow;
 
+mod nullable;
+pub use self::nullable::Nullable;
+
 // =================
 // === INTERNALS ===
 // =================

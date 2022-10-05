@@ -1,4 +1,4 @@
-use super::{First, Follow};
+use super::{Nullable, First, Follow};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Symbol {
@@ -9,7 +9,7 @@ pub enum Symbol {
     Variable(usize),
 }
 
-/// Barebones representation of a context free grammar.
+/// Barebones, immutable representation of a context free grammar.
 #[derive(Clone)]
 pub struct Grammar {
     lhs:     Vec<usize>,
@@ -68,43 +68,18 @@ impl Grammar {
     }
 
     #[must_use]
-    pub fn nullability(&self) -> Vec<bool> {
-        let mut nullable = vec![false; self.rules().len()];
-
-        let mut done = false;
-
-        while !done {
-            done = true;
-
-            for (A, rule) in self.rules().into_iter().enumerate() {
-                if !nullable[A] {
-                    nullable[A] = rule.alts().any(|alt| {
-                        alt.iter().all(|&symbol| {
-                            match symbol {
-                                Symbol::Terminal(_) => false,
-                                Symbol::Variable(B) => nullable[B],
-                            }
-                        })
-                    });
-        
-                    if nullable[A] {
-                        done = false;
-                    }
-                }
-            }
-        }
-
-        nullable
+    pub fn nullability(&self) -> Nullable {
+        Nullable::new(self)
     }
 
     #[must_use]
-    pub fn first_set(&self) -> (First, Vec<bool>) {
+    pub fn first_set(&self) -> (First, Nullable) {
         let nullable = self.nullability();
         (First::new(self, &nullable), nullable)
     }
 
     #[must_use]
-    pub fn follow_set(&self) -> (Follow, First, Vec<bool>) {
+    pub fn follow_set(&self) -> (Follow, First, Nullable) {
         let (first, nullable) = self.first_set();
         (Follow::new(self, &nullable, &first), first, nullable)
     }

@@ -1,7 +1,6 @@
 use std::collections::BTreeSet;
 use std::iter::once;
-use std::ops::Index;
-use super::{Grammar, Symbol, First};
+use super::{Grammar, Symbol, Nullable, First};
 
 /// A utility struct that, for each unique variable present in a 
 /// grammar, stores the set of terminals (the follow set) that can
@@ -17,7 +16,7 @@ pub struct Follow {
 
 impl Follow {
     #[must_use]
-    pub(super) fn new(grammar: &Grammar, nullable: &[bool], first: &First) -> Self {
+    pub(super) fn new(grammar: &Grammar, nullable: &Nullable, first: &First) -> Self {
         let var_follows = compute_var_follows(grammar, nullable, first);
         let var_ranges = once(0)
             .chain(
@@ -31,12 +30,8 @@ impl Follow {
             var_ranges,
         }
     }
-}
 
-impl Index<usize> for Follow {
-    type Output = [Option<usize>];
-
-    fn index(&self, var: usize) -> &Self::Output {
+    pub fn get(&self, var: usize) -> &[Option<usize>] {
         &self.follows[self.var_ranges[var]..self.var_ranges[var+1]]
     }
 }
@@ -46,7 +41,7 @@ impl Index<usize> for Follow {
 // =================
 
 /// Constructs the follow sets for each unique variable in grammar.
-fn compute_var_follows(grammar: &Grammar, nullable: &[bool], first: &First) -> Vec<BTreeSet<Option<usize>>> {
+fn compute_var_follows(grammar: &Grammar, nullable: &Nullable, first: &First) -> Vec<BTreeSet<Option<usize>>> {
     let mut follow = vec![BTreeSet::<Option<usize>>::new(); grammar.rules().len()];
     follow.last_mut().unwrap().insert(None);
 
@@ -65,8 +60,8 @@ fn compute_var_follows(grammar: &Grammar, nullable: &[bool], first: &First) -> V
                             follow[B].extend(&trailer);
                             done = false;
                         }
-                        let first_B = &first[B];
-                        if nullable[B] {
+                        let first_B = &first.get(B);
+                        if nullable.get(B) {
                             trailer.extend(first_B.iter().copied().map(Some));
                         } else {
                             trailer = first_B.iter().copied().map(Some).collect();

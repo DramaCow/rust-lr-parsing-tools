@@ -3,11 +3,11 @@
 use std::collections::BTreeSet;
 use std::iter::once;
 use super::{inner, LR1Item, LR1A, State};
-use crate::grammar::{Grammar, Symbol, First};
+use crate::grammar::{Grammar, Symbol, Nullable, First};
 
 pub struct LR1ABuilder<'a> {
     grammar: &'a Grammar,
-    nullable: Vec<bool>,
+    nullable: Nullable,
     first: First,
 }
 
@@ -56,9 +56,9 @@ impl inner::BuildItemSets<LR1Item> for LR1ABuilder<'_> {
                             }
                         },
                         Some(Symbol::Variable(A)) => {
-                            let first_A = &self.first[A];
+                            let first_A = self.first.get(A);
 
-                            if self.nullable[A] {
+                            if self.nullable.get(A) {
                                 for lookahead in first_A.iter().copied().map(Some).chain(once(item.lookahead)) {
                                     for alt in self.grammar.rules().get(var).production_ids() {
                                         if new_items.insert(LR1Item::new(alt, 0, lookahead)) {
