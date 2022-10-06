@@ -9,13 +9,13 @@ pub enum Symbol {
     Variable(usize),
 }
 
-/// Barebones, immutable representation of a context free grammar.
-#[derive(Clone)]
+/// Immutable representation of a context free grammar.
+#[derive(Clone, Debug)]
 pub struct Grammar {
-    lhs:     Vec<usize>,
-    symbols: Vec<Symbol>, // symbols that occur in RHS of productions
-    alts:    Vec<usize>,  // start index of each alt in symbols
-    rules:   Vec<usize>,  // start index of each rule in alts
+    lhs:     Vec<usize>,  // for production j, lhs[j] is the corresponding rule id
+    symbols: Vec<Symbol>, // flattened array of symbols that occur in RHS of productions
+    alts:    Vec<usize>,  // indices into `symbols` for production j are given as (alts[j]..alts[j+1])
+    rules:   Vec<usize>,  // indices into `alts` for rule i are given as (rules[i]..rules[i+1])
 }
 
 pub struct RuleView<'a> {
@@ -216,28 +216,31 @@ impl GrammarBuilder {
             grammar: Grammar {
                 lhs: Vec::new(),
                 symbols: Vec::new(),
-                alts: vec![0],
-                rules: vec![0],
+                alts: Vec::new(),
+                rules: Vec::new(),
             },
         }
     }
 
-    /// # Panics
     #[must_use]
-    pub fn rule(mut self, rule: &[&[Symbol]]) -> Self {
-        let lhs = self.grammar.rules.len() - 1;
-        for &alt in rule {
-            self.grammar.lhs.push(lhs);
-            self.grammar.symbols.append(&mut alt.to_vec());
-            self.grammar.alts.push(self.grammar.symbols.len());
-        }
-        self.grammar.rules.push(self.grammar.rules.last().unwrap() + rule.len());
+    pub fn new_rule(mut self) -> Self {
+        self.grammar.rules.push(self.grammar.alts.len());
+        self
+    }
+
+    pub fn add_production<I: IntoIterator<Item = Symbol>>(mut self, symbols: I) -> Self {
+        self.grammar.lhs.push(self.grammar.rules.len() - 1);
+        self.grammar.alts.push(self.grammar.symbols.len());
+        self.grammar.symbols.extend(symbols);
         self
     }
 
     /// # Errors
     /// # Panics
     pub fn build(mut self) -> Result<Grammar, GrammarBuildError> {
+        self.grammar.rules.push(self.grammar.alts.len());
+        self.grammar.alts.push(self.grammar.symbols.len());
+
         // Iterates through each rule and checks to see
         // if each variable is valid. If not, user receives 
         // error corresponding to the first erroneous symbol.
@@ -261,8 +264,8 @@ impl GrammarBuilder {
         // finally, we augment the grammar by adding a start rule
         self.grammar.lhs.push(self.grammar.rules.len() - 1);
         self.grammar.symbols.push(Symbol::Variable(0));
+        self.grammar.rules.push(self.grammar.alts.len());
         self.grammar.alts.push(self.grammar.symbols.len());
-        self.grammar.rules.push(self.grammar.rules.last().unwrap() + 1);
 
         Ok(self.grammar)
     }

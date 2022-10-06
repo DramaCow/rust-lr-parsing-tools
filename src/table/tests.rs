@@ -5,10 +5,11 @@ use crate::automata::LALR1A;
 
 #[test]
 fn parentheses_grammar() {
-    let grammar = GrammarBuilder::new()
-        .rule(&[&[Var(0), Var(1)], &[Var(1)]])
-        .rule(&[&[Word(0), Var(0), Word(1)], &[Word(0), Word(1)]])
-        .build().unwrap();
+    let grammar = GrammarBuilder::new().new_rule().add_production([Var(0), Var(1)])
+                                                  .add_production([Var(1)])
+                                       .new_rule().add_production([Word(0), Var(0), Word(1)])
+                                                  .add_production([Word(0), Word(1)])
+                                       .build().unwrap();
 
     let parser = NaiveLR1Table::build(&LALR1A::new(&grammar), |conflict: Conflict| { Err(conflict) }).unwrap();
 
@@ -47,10 +48,11 @@ fn parentheses_grammar() {
 
 #[test]
 fn parentheses_grammar_2() {
-    let grammar = GrammarBuilder::new()
-        .rule(&[&[Var(0), Var(1)], &[Var(1)]])
-        .rule(&[&[Word(0), Var(0), Word(1)], &[Word(0), Word(1)]])
-        .build().unwrap();
+    let grammar = GrammarBuilder::new().new_rule().add_production([Var(0), Var(1)])
+                                                  .add_production([Var(1)])
+                                       .new_rule().add_production([Word(0), Var(0), Word(1)])
+                                                  .add_production([Word(0), Word(1)])
+                                       .build().unwrap();
 
     let parser = NaiveLR1Table::build(&LALR1A::new(&grammar), |conflict: Conflict| { Err(conflict) }).unwrap();
 

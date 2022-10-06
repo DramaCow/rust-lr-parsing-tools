@@ -29,19 +29,18 @@ fn rr_expr_grammar() -> Grammar {
     // Factor : ( Expr )
     //        | name
     //        | num,
-    GrammarBuilder::new()
-        .rule(&[&[Term, Expr_]])
-        .rule(&[&[add, Term, Expr_],
-                &[sub, Term, Expr_],
-                &[]])
-        .rule(&[&[Factor, Term_]])
-        .rule(&[&[mul, Factor, Term_],
-                &[div, Factor, Term_],
-                &[]])
-        .rule(&[&[lparen, Expr, rparen],
-                &[name],
-                &[num]])
-        .build().unwrap()
+    GrammarBuilder::new().new_rule().add_production([Term, Expr_])
+                         .new_rule().add_production([add, Term, Expr_])
+                                    .add_production([sub, Term, Expr_])
+                                    .add_production([])
+                         .new_rule().add_production([Factor, Term_])
+                         .new_rule().add_production([mul, Factor, Term_])
+                                    .add_production([div, Factor, Term_])
+                                    .add_production([])
+                         .new_rule().add_production([lparen, Expr, rparen])
+                                    .add_production([name])
+                                    .add_production([num])
+                         .build().unwrap()
 }
 
 // ---
